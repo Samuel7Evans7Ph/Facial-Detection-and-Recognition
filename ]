@@ -1,0 +1,28 @@
+import cv2
+import matplotlib.pyplot as plt
+
+cap = cv2.VideoCapture(0)
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    
+    frame=frame[120:250+120,200:250,:]
+    if not ret:
+        break
+
+    # Display the frame in a window
+    cv2.imshow("image", frame)
+
+    # Exit the loop when 'q' is pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Show the last captured frame using matplotlib
+plt.imshow(frame)
+plt.title("Last Captured Frame")
+plt.show()
+
+print(frame.shape)
+
+cap.release()
+cv2.destroyAllWindows()
