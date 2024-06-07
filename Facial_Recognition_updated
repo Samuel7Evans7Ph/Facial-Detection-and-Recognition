@@ -1,0 +1,790 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "gpuType": "T4",
+      "toc_visible": true,
+      "mount_file_id": "1g0agL1b88FI-nwMDMlG7vzFfiXKGKRIJ",
+      "authorship_tag": "ABX9TyM19iG+a1TeXzydj3x2HEjW",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Samuel7Evans7Ph/Facial-Detection-and-Recognition/blob/master/Facial_Recognition_updated\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 3,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "LYjTy7I3EOZ8",
+        "outputId": "795626d1-2933-456c-8944-276908f6ed72"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting tensorflow==2.15.1\n",
+            "  Downloading tensorflow-2.15.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (475.2 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m475.2/475.2 MB\u001b[0m \u001b[31m3.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: opencv-python in /usr/local/lib/python3.10/dist-packages (4.8.0.76)\n",
+            "Requirement already satisfied: matplotlib in /usr/local/lib/python3.10/dist-packages (3.7.1)\n",
+            "Requirement already satisfied: absl-py>=1.0.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (1.4.0)\n",
+            "Requirement already satisfied: astunparse>=1.6.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (1.6.3)\n",
+            "Requirement already satisfied: flatbuffers>=23.5.26 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (24.3.25)\n",
+            "Requirement already satisfied: gast!=0.5.0,!=0.5.1,!=0.5.2,>=0.2.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (0.5.4)\n",
+            "Requirement already satisfied: google-pasta>=0.1.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (0.2.0)\n",
+            "Requirement already satisfied: h5py>=2.9.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (3.9.0)\n",
+            "Requirement already satisfied: libclang>=13.0.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (18.1.1)\n",
+            "Collecting ml-dtypes~=0.3.1 (from tensorflow==2.15.1)\n",
+            "  Downloading ml_dtypes-0.3.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.2 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m2.2/2.2 MB\u001b[0m \u001b[31m71.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: numpy<2.0.0,>=1.23.5 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (1.25.2)\n",
+            "Requirement already satisfied: opt-einsum>=2.3.2 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (3.3.0)\n",
+            "Requirement already satisfied: packaging in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (24.0)\n",
+            "Requirement already satisfied: protobuf!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5,<5.0.0dev,>=3.20.3 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (3.20.3)\n",
+            "Requirement already satisfied: setuptools in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (67.7.2)\n",
+            "Requirement already satisfied: six>=1.12.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (1.16.0)\n",
+            "Requirement already satisfied: termcolor>=1.1.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (2.4.0)\n",
+            "Requirement already satisfied: typing-extensions>=3.6.6 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (4.12.1)\n",
+            "Requirement already satisfied: wrapt<1.15,>=1.11.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (1.14.1)\n",
+            "Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (0.37.0)\n",
+            "Requirement already satisfied: grpcio<2.0,>=1.24.3 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (1.64.1)\n",
+            "Requirement already satisfied: tensorboard<2.16,>=2.15 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (2.15.2)\n",
+            "Requirement already satisfied: tensorflow-estimator<2.16,>=2.15.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (2.15.0)\n",
+            "Requirement already satisfied: keras<2.16,>=2.15.0 in /usr/local/lib/python3.10/dist-packages (from tensorflow==2.15.1) (2.15.0)\n",
+            "Requirement already satisfied: contourpy>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (1.2.1)\n",
+            "Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (0.12.1)\n",
+            "Requirement already satisfied: fonttools>=4.22.0 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (4.53.0)\n",
+            "Requirement already satisfied: kiwisolver>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (1.4.5)\n",
+            "Requirement already satisfied: pillow>=6.2.0 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (9.4.0)\n",
+            "Requirement already satisfied: pyparsing>=2.3.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (3.1.2)\n",
+            "Requirement already satisfied: python-dateutil>=2.7 in /usr/local/lib/python3.10/dist-packages (from matplotlib) (2.8.2)\n",
+            "Requirement already satisfied: wheel<1.0,>=0.23.0 in /usr/local/lib/python3.10/dist-packages (from astunparse>=1.6.0->tensorflow==2.15.1) (0.43.0)\n",
+            "Requirement already satisfied: google-auth<3,>=1.6.3 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.16,>=2.15->tensorflow==2.15.1) (2.27.0)\n",
+            "Requirement already satisfied: google-auth-oauthlib<2,>=0.5 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.16,>=2.15->tensorflow==2.15.1) (1.2.0)\n",
+            "Requirement already satisfied: markdown>=2.6.8 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.16,>=2.15->tensorflow==2.15.1) (3.6)\n",
+            "Requirement already satisfied: requests<3,>=2.21.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.16,>=2.15->tensorflow==2.15.1) (2.31.0)\n",
+            "Requirement already satisfied: tensorboard-data-server<0.8.0,>=0.7.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.16,>=2.15->tensorflow==2.15.1) (0.7.2)\n",
+            "Requirement already satisfied: werkzeug>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from tensorboard<2.16,>=2.15->tensorflow==2.15.1) (3.0.3)\n",
+            "Requirement already satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.10/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (5.3.3)\n",
+            "Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.10/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (0.4.0)\n",
+            "Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.10/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (4.9)\n",
+            "Requirement already satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.10/dist-packages (from google-auth-oauthlib<2,>=0.5->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (1.3.1)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (3.3.2)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (3.7)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (2.0.7)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests<3,>=2.21.0->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (2024.6.2)\n",
+            "Requirement already satisfied: MarkupSafe>=2.1.1 in /usr/local/lib/python3.10/dist-packages (from werkzeug>=1.0.1->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (2.1.5)\n",
+            "Requirement already satisfied: pyasn1<0.7.0,>=0.4.6 in /usr/local/lib/python3.10/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (0.6.0)\n",
+            "Requirement already satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<2,>=0.5->tensorboard<2.16,>=2.15->tensorflow==2.15.1) (3.2.2)\n",
+            "Installing collected packages: ml-dtypes, tensorflow\n",
+            "  Attempting uninstall: ml-dtypes\n",
+            "    Found existing installation: ml-dtypes 0.2.0\n",
+            "    Uninstalling ml-dtypes-0.2.0:\n",
+            "      Successfully uninstalled ml-dtypes-0.2.0\n",
+            "  Attempting uninstall: tensorflow\n",
+            "    Found existing installation: tensorflow 2.15.0\n",
+            "    Uninstalling tensorflow-2.15.0:\n",
+            "      Successfully uninstalled tensorflow-2.15.0\n",
+            "Successfully installed ml-dtypes-0.3.2 tensorflow-2.15.1\n"
+          ]
+        }
+      ],
+      "source": [
+        "# !pip install tensorflow==2.15.1  opencv-python matplotlib"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import tensorflow as tf\n",
+        "physical_devices = tf.config.list_physical_devices('GPU')\n",
+        "\n",
+        "print(\"GPU:\", tf.config.list_physical_devices('GPU'))\n",
+        "print(\"Num GPUs:\", len(physical_devices))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "6AOOunLbGIAi",
+        "outputId": "5f7de863-4cd1-49e0-844f-c4e56b6e4c01"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "GPU: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]\n",
+            "Num GPUs: 1\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [],
+      "metadata": {
+        "id": "Zpf4pFDpHAsb"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import cv2\n",
+        "import matplotlib.pyplot as plt\n",
+        "import os\n",
+        "import random\n",
+        "import numpy as np"
+      ],
+      "metadata": {
+        "id": "NeW2slVKE8pZ"
+      },
+      "execution_count": 4,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#importing tensorflow functional APIs\n",
+        "\n",
+        "from tensorflow.keras.models import Model\n",
+        "from tensorflow.keras.layers import Layer,Conv2D,Dense,MaxPooling2D,Input,Flatten\n",
+        "import tensorflow as tf"
+      ],
+      "metadata": {
+        "id": "J2bGoPy-HOvG"
+      },
+      "execution_count": 5,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Model(inputs=[inputimage,verificationimage],outputs=[1,0])\n",
+        "\n",
+        "# for avoiding memory run out erros for ram overflow\n",
+        "\n",
+        "gpus=tf.config.experimental.list_physical_devices('GPU')\n",
+        "\n",
+        "for gpu in gpus:\n",
+        "  tf.config.experimental.set_memory_growth(gpu,True)"
+      ],
+      "metadata": {
+        "id": "HfbKsrrLIRp_"
+      },
+      "execution_count": 6,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "gpus"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "hLCwxTF3I2dh",
+        "outputId": "b1d3a29d-add7-4056-a76e-75e31ae047ff"
+      },
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 8
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# creating new directories\n",
+        "\n",
+        "posit_path=os.path.join('data','positive')\n",
+        "negat_path=os.path.join('data','negative')\n",
+        "anchor_path=os.path.join('data','anchor')"
+      ],
+      "metadata": {
+        "id": "zZIxLwE8LwOQ"
+      },
+      "execution_count": 7,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "os.makedirs(posit_path)\n",
+        "os.makedirs(negat_path)\n",
+        "os.makedirs(anchor_path)"
+      ],
+      "metadata": {
+        "id": "RJNo9y3pOWiQ"
+      },
+      "execution_count": 8,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ],
+      "metadata": {
+        "id": "nhCOXtRmqY1f",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "675a2221-1727-426d-fb86-a3eddfcf907d"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Drive already mounted at /content/drive; to attempt to forcibly remount, call drive.mount(\"/content/drive\", force_remount=True).\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# New section"
+      ],
+      "metadata": {
+        "id": "ItSLxXXYqk4N"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# New section"
+      ],
+      "metadata": {
+        "id": "M1bgULJJqk71"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "#uncompressing the file\n",
+        "\n",
+        "!tar -xf lfw.tgz"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "jrhHz1KTxSqj",
+        "outputId": "832b62ad-4c4d-4c2e-adf6-0ef2fdbd3534"
+      },
+      "execution_count": 10,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            "gzip: stdin: unexpected end of file\n",
+            "tar: Unexpected EOF in archive\n",
+            "tar: Unexpected EOF in archive\n",
+            "tar: Error is not recoverable: exiting now\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for dir in os.listdir('lfw'):\n",
+        "  for file in os.listdir(os.path.join('lfw',dir)):\n",
+        "    EX_PATH=os.path.join('lfw',dir,file)\n",
+        "    new_path=os.path.join(negat_path,file)\n",
+        "    os.replace(EX_PATH,new_path)"
+      ],
+      "metadata": {
+        "id": "FqOf_09DP0_h"
+      },
+      "execution_count": 12,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "anchor=tf.data.Dataset.list_files(anchor_path +'/*.jpg').take(250)\n",
+        "positive=tf.data.Dataset.list_files(posit_path+'/*.jpg').take(250)\n",
+        "negative=tf.data.Dataset.list_files(negat_path+'/*.jpg').take(250)"
+      ],
+      "metadata": {
+        "id": "UyW1PzcuSoSx"
+      },
+      "execution_count": 13,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "positives=tf.data.Dataset.zip((anchor,positive,tf.data.Dataset.from_tensor_slices(np.ones(len(anchor)))))\n",
+        "negatives=tf.data.Dataset.zip((anchor,negative,tf.data.Dataset.from_tensor_slices(np.zeros(len(anchor)))))"
+      ],
+      "metadata": {
+        "id": "k0OK8YTWXyBV"
+      },
+      "execution_count": 14,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "len(positives)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "s4oU0AKu4-e7",
+        "outputId": "85c58d00-eb50-4748-87f4-19565229d551"
+      },
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "250"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 18
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def preprocess(file_path):\n",
+        "  byte_img=tf.io.read_file(file_path)\n",
+        "  img=tf.io.decode_jpeg(byte_img)\n",
+        "  img=tf.image.resize(img,(100,100))\n",
+        "  img=img/255\n",
+        "  return img\n"
+      ],
+      "metadata": {
+        "id": "Z8GE_urQ4zQc"
+      },
+      "execution_count": 15,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def preprocess_twin(input_img,validation_img,label):\n",
+        "  return(preprocess(input_img),preprocess(validation_img),label)"
+      ],
+      "metadata": {
+        "id": "lnOfXLvg-Pa_"
+      },
+      "execution_count": 16,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data=positives.concatenate(negatives)\n",
+        "print(len(data))"
+      ],
+      "metadata": {
+        "id": "g2WGLCNHZEvw",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "ac113e18-cfd3-4e3a-cda6-7e908fa58bc0"
+      },
+      "execution_count": 17,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "327\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "example=data.as_numpy_iterator()\n",
+        "sample=example.next()\n",
+        "# *example"
+      ],
+      "metadata": {
+        "id": "OnN26O_X_BcA"
+      },
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "res=preprocess_twin(*sample)"
+      ],
+      "metadata": {
+        "id": "m7N9Dg7T_Qgi"
+      },
+      "execution_count": 19,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "res[1]"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "22QfEQbS_j6E",
+        "outputId": "ae0ef404-9610-4f61-c1f7-94d8a5b0bdf8"
+      },
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<tf.Tensor: shape=(100, 100, 3), dtype=float32, numpy=\n",
+              "array([[[0.64215684, 0.64411765, 0.64117646],\n",
+              "        [0.64215684, 0.65      , 0.6460784 ],\n",
+              "        [0.6627451 , 0.65686274, 0.6578431 ],\n",
+              "        ...,\n",
+              "        [0.5901961 , 0.5980392 , 0.57843137],\n",
+              "        [0.5882353 , 0.59607846, 0.5764706 ],\n",
+              "        [0.5882353 , 0.59607846, 0.5764706 ]],\n",
+              "\n",
+              "       [[0.64705884, 0.6490196 , 0.6460784 ],\n",
+              "        [0.6480392 , 0.65588236, 0.6519608 ],\n",
+              "        [0.65686274, 0.65882355, 0.6578431 ],\n",
+              "        ...,\n",
+              "        [0.5872549 , 0.595098  , 0.5754902 ],\n",
+              "        [0.5764706 , 0.58431375, 0.5647059 ],\n",
+              "        [0.57941175, 0.5872549 , 0.56764704]],\n",
+              "\n",
+              "       [[0.65      , 0.6519608 , 0.6431373 ],\n",
+              "        [0.64705884, 0.654902  , 0.6431373 ],\n",
+              "        [0.6647059 , 0.66568625, 0.6735294 ],\n",
+              "        ...,\n",
+              "        [0.59117645, 0.5990196 , 0.57941175],\n",
+              "        [0.5872549 , 0.595098  , 0.5754902 ],\n",
+              "        [0.5872549 , 0.595098  , 0.5754902 ]],\n",
+              "\n",
+              "       ...,\n",
+              "\n",
+              "       [[0.5245098 , 0.5323529 , 0.61470586],\n",
+              "        [0.4343137 , 0.44215685, 0.5382353 ],\n",
+              "        [0.30294117, 0.33039215, 0.44019607],\n",
+              "        ...,\n",
+              "        [0.6284314 , 0.63235295, 0.60882354],\n",
+              "        [0.63039213, 0.62647057, 0.6068627 ],\n",
+              "        [0.62058824, 0.6166667 , 0.6       ]],\n",
+              "\n",
+              "       [[0.5       , 0.51666665, 0.5980392 ],\n",
+              "        [0.35686275, 0.3647059 , 0.4627451 ],\n",
+              "        [0.25490198, 0.27450982, 0.3882353 ],\n",
+              "        ...,\n",
+              "        [0.62058824, 0.6245098 , 0.6009804 ],\n",
+              "        [0.6156863 , 0.61960787, 0.59607846],\n",
+              "        [0.60882354, 0.6127451 , 0.59313726]],\n",
+              "\n",
+              "       [[0.46372548, 0.48039216, 0.5617647 ],\n",
+              "        [0.33529413, 0.33529413, 0.4372549 ],\n",
+              "        [0.24313726, 0.25882354, 0.37254903],\n",
+              "        ...,\n",
+              "        [0.60490197, 0.6127451 , 0.59313726],\n",
+              "        [0.6039216 , 0.6117647 , 0.5921569 ],\n",
+              "        [0.59705883, 0.60490197, 0.5852941 ]]], dtype=float32)>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 24
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "1hHPXSNjIEGZ"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data=data.map(preprocess_twin)"
+      ],
+      "metadata": {
+        "id": "-aZqWREBCAwz"
+      },
+      "execution_count": 20,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "data=data.cache()\n",
+        "data=data.shuffle(buffer_size=1024)"
+      ],
+      "metadata": {
+        "id": "-L9mxzF5CqfW"
+      },
+      "execution_count": 21,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "train_data=data.take(round(len(data)*0.7))\n",
+        "print(len(train_data))\n",
+        "train_data=train_data.batch(16)\n",
+        "# print(len(train_data[0]))"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "28KJ20KYLOKQ",
+        "outputId": "b30025b5-8ad2-4ac7-d9bb-e6d890123cb4"
+      },
+      "execution_count": 22,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "229\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "test_data=data.skip(round(len(data)*0.7))\n",
+        "test_data=test_data.take(round(len(data)*0.3))\n",
+        "test_data=test_data.batch(16)\n"
+      ],
+      "metadata": {
+        "id": "Jgt4k6XGLbg9"
+      },
+      "execution_count": 23,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "inp=Input(shape=(100,100,3),name=\"input\")"
+      ],
+      "metadata": {
+        "id": "Fh5xQbmSUyXj"
+      },
+      "execution_count": 24,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "c1=Conv2D(64,(10,10),activation='relu')(inp)"
+      ],
+      "metadata": {
+        "id": "AIAfx1gaU5Yp"
+      },
+      "execution_count": 25,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def make_embedding():\n",
+        "  inp=Input(shape=(100,100,3),name='input_image')\n",
+        "\n",
+        "  # first block\n",
+        "  c1=Conv2D(64,(10,10),activation='relu')(inp)\n",
+        "  m1=MaxPooling2D(64,(2,2),padding='same')(c1)\n",
+        "\n",
+        "  # seond block\n",
+        "  c2=Conv2D(128,(7,7),activation='relu')(m1)\n",
+        "  m2=MaxPooling2D(64,(2,2),padding='same')(c2)\n",
+        "\n",
+        "  #third block\n",
+        "  c3=Conv2D(128,(4,4),activation='relu')(m2)\n",
+        "  m3=MaxPooling2D(64,(2,2),padding='same')(c3)\n",
+        "\n",
+        "\n",
+        "\n",
+        "  #convolution and dense layer towards the end\n",
+        "  c4=Conv2D(256,(4,4),activation='relu')(m3)\n",
+        "  f1=Flatten()(c4)\n",
+        "  d1=Dense(4096,activation='sigmoid')(f1)\n",
+        "  return Model(inputs=[inp],outputs=[d1],name=\"embedding\")"
+      ],
+      "metadata": {
+        "id": "nHNyO7FUL7l9"
+      },
+      "execution_count": 27,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "embedding=make_embedding()\n",
+        "embedding.summary()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "SOg3wG84DMTm",
+        "outputId": "6506c486-6073-439e-ef60-60cb445799cf"
+      },
+      "execution_count": 34,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"embedding\"\n",
+            "_________________________________________________________________\n",
+            " Layer (type)                Output Shape              Param #   \n",
+            "=================================================================\n",
+            " input_image (InputLayer)    [(None, 100, 100, 3)]     0         \n",
+            "                                                                 \n",
+            " conv2d_13 (Conv2D)          (None, 91, 91, 64)        19264     \n",
+            "                                                                 \n",
+            " max_pooling2d_9 (MaxPoolin  (None, 46, 46, 64)        0         \n",
+            " g2D)                                                            \n",
+            "                                                                 \n",
+            " conv2d_14 (Conv2D)          (None, 40, 40, 128)       401536    \n",
+            "                                                                 \n",
+            " max_pooling2d_10 (MaxPooli  (None, 20, 20, 128)       0         \n",
+            " ng2D)                                                           \n",
+            "                                                                 \n",
+            " conv2d_15 (Conv2D)          (None, 17, 17, 128)       262272    \n",
+            "                                                                 \n",
+            " max_pooling2d_11 (MaxPooli  (None, 9, 9, 128)         0         \n",
+            " ng2D)                                                           \n",
+            "                                                                 \n",
+            " conv2d_16 (Conv2D)          (None, 6, 6, 256)         524544    \n",
+            "                                                                 \n",
+            " flatten_3 (Flatten)         (None, 9216)              0         \n",
+            "                                                                 \n",
+            " dense_3 (Dense)             (None, 4096)              37752832  \n",
+            "                                                                 \n",
+            "=================================================================\n",
+            "Total params: 38960448 (148.62 MB)\n",
+            "Trainable params: 38960448 (148.62 MB)\n",
+            "Non-trainable params: 0 (0.00 Byte)\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "class L1Dist(Layer):\n",
+        "\n",
+        "  #init method-inheritance\n",
+        "  def __init__(self,**kwargs):\n",
+        "    super().__init__()\n",
+        "\n",
+        "  def call(self,input_embedding,validation_embedding):\n",
+        "    return tf.math.abs(input_embedding-validation_embedding)"
+      ],
+      "metadata": {
+        "id": "W9THhqitE3NH"
+      },
+      "execution_count": 35,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "l1=L1Dist()"
+      ],
+      "metadata": {
+        "id": "bCRSLuD_O4JU"
+      },
+      "execution_count": 33,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def make_siamese_model():\n",
+        "\n",
+        "  #anchor image in the network\n",
+        "  input_img=Input(name=\"input image\",shape=(3,3))\n",
+        "\n",
+        "\n",
+        "  #validation image in the network\n",
+        "  valid_img=Input(name=\"validation image\",shape=(100,100,3))\n",
+        "\n",
+        "  siamese_layer=L1Dist()\n",
+        "  siamese_layer._name='distance'\n",
+        "  distances=siamese_layer(embedding(input_img),embedding(valid_img))\n",
+        "\n",
+        "  classifier=Dense(1,activation='sigmoid')(distances)\n",
+        "\n",
+        "  return Model(inputs=[input_img,valid_img],output=classifier,name=\"siamese model\")\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "N-bZelCgPjzs"
+      },
+      "execution_count": 39,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "E_QyaA1HPkLx"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
